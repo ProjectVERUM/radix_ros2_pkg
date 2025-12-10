@@ -18,7 +18,8 @@ static Parameters TestParameters[] = {
 //----------------------------------------
 
 template <typename PointT = pcl::PointXYZ>
-inline typename pcl::PointCloud<PointT>::Ptr ReadCloud(const std::string& filename) {
+inline typename pcl::PointCloud<PointT>::Ptr ReadCloud(
+    const std::string& filename) {
   auto path = std::filesystem::path(DATA_PATH);
   auto full_path = (path / filename).generic_string();
 

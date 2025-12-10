@@ -1,0 +1,74 @@
+radix_server:
+  ros__parameters:
+    # Behavior of Map (Voxeltype, incoming pointcloud type, insertion behavior)
+    behavior: gaussian
+
+    # VoxelGrid resolution (edge length of one Voxel in meters)
+    resolution: 0.5
+
+    # Pointcloud input
+    # Frame ids
+    # main insertion topic (for lidar like pc, with cleaning ray)
+    cloud_in_topic: /semantic_cloud
+    world_frame_id: map
+
+    # Publisher topics
+    # Topic for publishing radix point cloud voxel centers
+    point_cloud_centers_topic: radix_point_cloud_centers
+    # Topic for publishing a chunk
+    chunk_topic: radix_chunk
+    # Topic for publishing a chunk including free voxels
+    chunk_free_topic: radix_chunk_free
+    # Topic for publishing rendered image
+    image_topic: radix_image
+    # Topic for publishing acknowledgement after point cloud insertion
+    ack_topic: radix_ack
+
+    # max range to integrate points (-1.0 for no limit)
+    sensor_model.max_range: -1.0
+
+    # Enable/Disable monodepth uncertainty of occupancy probability along the ray
+    monodepth_bias: false
+    # Threshold distance for adjusting occupancy probability along the ray
+    monodepth_bias_thresh: 1.1
+    # Enable/Disable cleaning ray
+    cleaning_ray: true
+    # Enable/Disable update_id
+    update_id: false
+
+    # default probabilities (if nothing is specified for the label)
+    prob_init: 0.5
+    prob_hit: 0.7
+    prob_miss: 0.4
+    prob_min: 0.12
+    prob_max: 0.97
+
+    # publishing
+    occupancy_threshold: 0.5
+    latched_topics: true
+
+    # Loading
+    map_dir: maps
+    load_extension: ".radix"
+    load_map: ""
+
+    # Frame to render from
+    render_frame_id: os_lidar
+
+    # Other
+    # Enable/Disable rules
+    apply_rules: false
+    # Enable/Disable continuous publishing (every 10sec)
+    cont_pub: true
+    publish_on_insert: true
+    delete_rest: false
+
+    # Queue size for TF message filter
+    tf_queue_size: 20
+    # Timeout for waiting for TF transforms
+    tf_timeout: 20
+    # Timer period for continuous publishing
+    publish_timer: 10
+
+    # Behavior specific parameters
+    store_last: false

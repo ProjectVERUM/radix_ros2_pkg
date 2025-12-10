@@ -76,10 +76,13 @@ inline void Write(std::ostream& out, const T& val) {
 
 template <typename DataT>
 inline void Serialize(std::ostream& out, const VoxelGrid<DataT>& grid) {
-  static_assert(std::is_trivially_copyable_v<DataT>, "DataT must be trivially copyable");
+  // static_assert(std::is_trivially_copyable_v<DataT>, "DataT must be trivially copyable");
 
   char header[256];
   std::string type_name = details::demangle(typeid(DataT).name());
+
+  sprintf(header, "Bonxai::VoxelGrid<%s,%d,%d>(%lf)\n", type_name.c_str(),
+          grid.innerBits(), grid.leafBits(), grid.getResolution());
 
   out.write(header, std::strlen(header));
 
@@ -107,16 +110,48 @@ inline void Serialize(std::ostream& out, const VoxelGrid<DataT>& grid) {
         const uint32_t leaf_index = *leaf;
         Write(out, leaf_grid.cell(leaf_index));
       }
+
+      const MetaData* leaf_meta = leaf_grid.meta_;
+      Write(out, *leaf_meta);
     }
+    const MetaData* inner_meta = inner_grid.meta_;
+    Write(out, *inner_meta);
   }
 }
 
 template <typename T>
 inline T Read(std::istream& input) {
   T out;
-  static_assert(std::is_trivially_copyable_v<T>, "Must be trivially copyable");
+  // static_assert(std::is_trivially_copyable_v<T>, "Must be trivially copyable");
   input.read(reinterpret_cast<char*>(&out), sizeof(T));
   return out;
+}
+
+template <>
+inline void Write(std::ostream& out, const MetaData& metadata) {
+  Write(out, metadata.last_class);
+  Write(out, metadata.max_class);
+  Write(out, metadata.max_log_prob);
+  Write(out, metadata.class_count.size());
+  for (const auto& [key, value] : metadata.class_count) {
+    Write(out, key);
+    Write(out, value);
+  }
+}
+
+template <>
+inline MetaData Read(std::istream& input) {
+  MetaData metadata;
+  metadata.last_class = Read<int32_t>(input);
+  metadata.max_class = Read<int32_t>(input);
+  metadata.max_log_prob = Read<int32_t>(input);
+  size_t size = Read<size_t>(input);
+  for (size_t i = 0; i < size; i++) {
+    int32_t key = Read<int32_t>(input);
+    int value = Read<int>(input);
+    metadata.class_count[key] = value;
+  }
+  return metadata;
 }
 
 inline HeaderInfo GetHeaderInfo(std::string header) {
@@ -167,10 +202,13 @@ inline VoxelGrid<DataT> Deserialize(std::istream& input, HeaderInfo info) {
 
     auto inner_it = grid.rootMap().find(root_coord);
     if (inner_it == grid.rootMap().end()) {
-      inner_it = grid.rootMap()
-                     .insert({root_coord, typename VoxelGrid<DataT>::InnerGrid(info.inner_bits)})
-                     .first;
+      inner_it =
+          grid.rootMap()
+              .insert({root_coord,
+                       typename VoxelGrid<DataT>::InnerGrid(info.inner_bits)})
+              .first;
     }
+
     auto& inner_grid = inner_it->second;
 
     for (size_t w = 0; w < inner_grid.mask().wordCount(); w++) {
@@ -189,8 +227,14 @@ inline VoxelGrid<DataT> Deserialize(std::istream& input, HeaderInfo info) {
         const uint32_t leaf_index = *leaf;
         leaf_grid->cell(leaf_index) = Read<DataT>(input);
       }
+      MetaData* leaf_meta_data = new MetaData(Read<MetaData>(input));
+      leaf_grid->meta_ = leaf_meta_data;
     }
+
+    MetaData* inner_meta_data = new MetaData(Read<MetaData>(input));
+    inner_grid.meta_ = inner_meta_data;
   }
+
   return grid;
 }
 

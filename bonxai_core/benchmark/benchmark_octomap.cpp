@@ -47,7 +47,8 @@ static void Octomap_IterateAllCells(benchmark::State& state) {
   int count = 0;
   for (auto _ : state) {
     count = 0;
-    for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end; ++it) {
+    for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end;
+         ++it) {
       benchmark::DoNotOptimize(it.getCoordinate());
       benchmark::DoNotOptimize(it->getValue());
       count++;

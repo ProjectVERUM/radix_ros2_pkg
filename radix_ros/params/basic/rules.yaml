@@ -1,0 +1,6 @@
+radix_server:
+  ros__parameters:
+    rules:
+      dilation:
+        kernel_size: [5]
+        update_thres: 1    # default threshold

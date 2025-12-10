@@ -35,3 +35,17 @@
 
 .vscode
 *.pcd
+__pycache__/
+
+radix_ros/launch/launch_tmp.xml
+
+# virtualenv
+.venv
+
+# specific launch files
+sem_voxel_map.launch.xml
+
+# generated output
+out/
+
+dashboard/imgs/

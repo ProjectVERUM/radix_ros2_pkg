@@ -1,0 +1,10 @@
+# pip install mkdocs==1.6.0 mkdocs-material==9.5.21 jinja2==3.1.4
+site_name: Radix Package Documentation
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep orange
+    accent: light green
+  features:
+    - content.code.copy

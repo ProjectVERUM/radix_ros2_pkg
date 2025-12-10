@@ -10,10 +10,10 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
-#include <functional>
 
 #include "mask.hpp"
 
@@ -49,13 +49,9 @@ class GridBlockAllocator {
 
   void releaseUnusedMemory();
 
-  size_t capacity() const {
-    return capacity_;
-  }
+  size_t capacity() const { return capacity_; }
 
-  size_t size() const {
-    return size_;
-  }
+  size_t size() const { return size_; }
 
   size_t memUsage() const;
 
@@ -68,8 +64,7 @@ class GridBlockAllocator {
   size_t capacity_ = 0;
   size_t size_ = 0;
   struct Chunk {
-    Chunk()
-        : mask(3, true) {}
+    Chunk() : mask(3, true) {}
     Mask mask;
     std::vector<char> data;
   };
@@ -126,11 +121,12 @@ template <typename DataT>
 inline void GridBlockAllocator<DataT>::releaseUnusedMemory() {
   std::unique_lock lock(*mutex_);
   int to_be_erased_count = 0;
-  auto remove_if = std::remove_if(chunks_.begin(), chunks_.end(), [&](const auto& chunk) -> bool {
-    bool notUsed = chunk->mask.isOn();
-    to_be_erased_count += (notUsed) ? 1 : 0;
-    return notUsed;
-  });
+  auto remove_if = std::remove_if(chunks_.begin(), chunks_.end(),
+                                  [&](const auto& chunk) -> bool {
+                                    bool notUsed = chunk->mask.isOn();
+                                    to_be_erased_count += (notUsed) ? 1 : 0;
+                                    return notUsed;
+                                  });
   chunks_.erase(remove_if, chunks_.end());
   capacity_ -= to_be_erased_count * blocks_per_chunk;
 }
@@ -149,8 +145,9 @@ inline void GridBlockAllocator<DataT>::addNewChunk() {
 }
 
 template <typename DataT>
-inline typename GridBlockAllocator<DataT>::Deleter GridBlockAllocator<DataT>::createDeleter(
-    std::shared_ptr<Chunk> chunk, uint32_t index) {
+inline typename GridBlockAllocator<DataT>::Deleter
+GridBlockAllocator<DataT>::createDeleter(std::shared_ptr<Chunk> chunk,
+                                         uint32_t index) {
   return [this, index, chunk] {
     assert(index < blocks_per_chunk);
     std::unique_lock lock(*mutex_);

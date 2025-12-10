@@ -37,42 +37,26 @@ class Mask {
   size_t memUsage() const;
 
   /// Return the number of bits available in this Mask
-  uint32_t bitCount() const {
-    return SIZE;
-  }
+  uint32_t bitCount() const { return SIZE; }
 
   /// Return the number of machine words used by this Mask
-  uint32_t wordCount() const {
-    return WORD_COUNT;
-  }
+  uint32_t wordCount() const { return WORD_COUNT; }
 
-  uint64_t getWord(size_t n) const {
-    return words_[n];
-  }
+  uint64_t getWord(size_t n) const { return words_[n]; }
 
-  void setWord(size_t n, uint64_t v) {
-    words_[n] = v;
-  }
+  void setWord(size_t n, uint64_t v) { words_[n] = v; }
 
   uint32_t countOn() const;
 
   class Iterator {
    public:
-    Iterator(const Mask* parent)
-        : pos_(parent->SIZE),
-          parent_(parent) {}
-    Iterator(uint32_t pos, const Mask* parent)
-        : pos_(pos),
-          parent_(parent) {}
+    Iterator(const Mask* parent) : pos_(parent->SIZE), parent_(parent) {}
+    Iterator(uint32_t pos, const Mask* parent) : pos_(pos), parent_(parent) {}
     Iterator& operator=(const Iterator&) = default;
 
-    uint32_t operator*() const {
-      return pos_;
-    }
+    uint32_t operator*() const { return pos_; }
 
-    operator bool() const {
-      return pos_ != parent_->SIZE;
-    }
+    operator bool() const { return pos_ != parent_->SIZE; }
 
     Iterator& operator++() {
       pos_ = parent_->findNextOn(pos_ + 1);
@@ -86,13 +70,9 @@ class Mask {
 
   bool operator==(const Mask& other) const;
 
-  bool operator!=(const Mask& other) const {
-    return !((*this) == other);
-  }
+  bool operator!=(const Mask& other) const { return !((*this) == other); }
 
-  Iterator beginOn() const {
-    return Iterator(this->findFirstOn(), this);
-  }
+  Iterator beginOn() const { return Iterator(this->findFirstOn(), this); }
 
   /// Return true if the given bit is set.
   bool isOn(uint32_t n) const;
@@ -123,9 +103,7 @@ class Mask {
 
   uint32_t findFirstOn() const;
 
-  uint32_t size() const {
-    return SIZE;
-  }
+  uint32_t size() const { return SIZE; }
 
  private:
   uint32_t findNextOn(uint32_t start) const;
@@ -156,13 +134,15 @@ inline uint32_t Mask::FindLowestOn(uint64_t v) {
   unsigned long index;
   _BitScanForward64(&index, v);
   return static_cast<uint32_t>(index);
-#elif (defined(__GNUC__) || defined(__clang__)) && defined(BONXAI_USE_INTRINSICS)
+#elif (defined(__GNUC__) || defined(__clang__)) && \
+    defined(BONXAI_USE_INTRINSICS)
   return static_cast<uint32_t>(__builtin_ctzll(v));
 #else
   static const unsigned char DeBruijn[64] = {
-      0,  1,  2,  53, 3,  7,  54, 27, 4,  38, 41, 8,  34, 55, 48, 28, 62, 5,  39, 46, 44, 42,
-      22, 9,  24, 35, 59, 56, 49, 18, 29, 11, 63, 52, 6,  26, 37, 40, 33, 47, 61, 45, 43, 21,
-      23, 58, 17, 10, 51, 25, 36, 32, 60, 20, 57, 16, 50, 31, 19, 15, 30, 14, 13, 12,
+      0,  1,  2,  53, 3,  7,  54, 27, 4,  38, 41, 8,  34, 55, 48, 28,
+      62, 5,  39, 46, 44, 42, 22, 9,  24, 35, 59, 56, 49, 18, 29, 11,
+      63, 52, 6,  26, 37, 40, 33, 47, 61, 45, 43, 21, 23, 58, 17, 10,
+      51, 25, 36, 32, 60, 20, 57, 16, 50, 31, 19, 15, 30, 14, 13, 12,
   };
 // disable unary minus on unsigned warning
 #if defined(_MSC_VER) && !defined(__NVCC__)
@@ -189,8 +169,11 @@ inline uint32_t Mask::CountOn(uint64_t v) {
   // Software Implementation
   /// @warning evil bit twiddling ahead!
   v = v - ((v >> 1) & uint64_t(0x5555555555555555));
-  v = (v & uint64_t(0x3333333333333333)) + ((v >> 2) & uint64_t(0x3333333333333333));
-  v = (((v + (v >> 4)) & uint64_t(0xF0F0F0F0F0F0F0F)) * uint64_t(0x101010101010101)) >> 56;
+  v = (v & uint64_t(0x3333333333333333)) +
+      ((v >> 2) & uint64_t(0x3333333333333333));
+  v = (((v + (v >> 4)) & uint64_t(0xF0F0F0F0F0F0F0F)) *
+       uint64_t(0x101010101010101)) >>
+      56;
 #endif
   return static_cast<uint32_t>(v);
 }
@@ -253,8 +236,7 @@ inline uint32_t Mask::findNextOn(uint32_t start) const {
 }
 
 inline Mask::Mask(size_t log2dim)
-    : SIZE(1U << (3 * log2dim)),
-      WORD_COUNT(std::max(SIZE >> 6, 1u)) {
+    : SIZE(1U << (3 * log2dim)), WORD_COUNT(std::max(SIZE >> 6, 1u)) {
   words_ = (WORD_COUNT <= 8) ? static_words_ : new uint64_t[WORD_COUNT];
 
   for (uint32_t i = 0; i < WORD_COUNT; ++i) {
@@ -263,8 +245,7 @@ inline Mask::Mask(size_t log2dim)
 }
 
 inline Mask::Mask(size_t log2dim, bool on)
-    : SIZE(1U << (3 * log2dim)),
-      WORD_COUNT(std::max(SIZE >> 6, 1u)) {
+    : SIZE(1U << (3 * log2dim)), WORD_COUNT(std::max(SIZE >> 6, 1u)) {
   words_ = (WORD_COUNT <= 8) ? static_words_ : new uint64_t[WORD_COUNT];
 
   const uint64_t v = on ? ~uint64_t(0) : uint64_t(0);
@@ -274,8 +255,7 @@ inline Mask::Mask(size_t log2dim, bool on)
 }
 
 inline Mask::Mask(const Mask& other)
-    : SIZE(other.SIZE),
-      WORD_COUNT(other.WORD_COUNT) {
+    : SIZE(other.SIZE), WORD_COUNT(other.WORD_COUNT) {
   words_ = (WORD_COUNT <= 8) ? static_words_ : new uint64_t[WORD_COUNT];
 
   for (uint32_t i = 0; i < WORD_COUNT; ++i) {
@@ -284,8 +264,7 @@ inline Mask::Mask(const Mask& other)
 }
 
 inline Mask::Mask(Mask&& other)
-    : SIZE(other.SIZE),
-      WORD_COUNT(other.WORD_COUNT) {
+    : SIZE(other.SIZE), WORD_COUNT(other.WORD_COUNT) {
   if (WORD_COUNT <= 8) {
     words_ = static_words_;
     for (uint32_t i = 0; i < WORD_COUNT; ++i) {

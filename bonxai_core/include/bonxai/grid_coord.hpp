@@ -77,17 +77,18 @@ struct CoordT {
   CoordT& operator-=(const CoordT& other);
 };
 
-[[nodiscard]] inline CoordT PosToCoord(const Point3D& point, double inv_resolution) {
-  return {
-      static_cast<int32_t>(std::floor(point.x * inv_resolution)),
-      static_cast<int32_t>(std::floor(point.y * inv_resolution)),
-      static_cast<int32_t>(std::floor(point.z * inv_resolution))};
+[[nodiscard]] inline CoordT PosToCoord(const Point3D& point,
+                                       double inv_resolution) {
+  return {static_cast<int32_t>(std::floor(point.x * inv_resolution)),
+          static_cast<int32_t>(std::floor(point.y * inv_resolution)),
+          static_cast<int32_t>(std::floor(point.z * inv_resolution))};
 }
 
-[[nodiscard]] inline Point3D CoordToPos(const CoordT& coord, double resolution) {
-  return {
-      (static_cast<double>(coord.x)) * resolution, (static_cast<double>(coord.y)) * resolution,
-      (static_cast<double>(coord.z)) * resolution};
+[[nodiscard]] inline Point3D CoordToPos(const CoordT& coord,
+                                        double resolution) {
+  return {(static_cast<double>(coord.x)) * resolution,
+          (static_cast<double>(coord.y)) * resolution,
+          (static_cast<double>(coord.z)) * resolution};
 }
 
 //----------------------------------------------------
@@ -95,9 +96,7 @@ struct CoordT {
 //----------------------------------------------------
 
 inline Point3D::Point3D(double _x, double _y, double _z)
-    : x(_x),
-      y(_y),
-      z(_z) {}
+    : x(_x), y(_y), z(_z) {}
 
 inline double& Point3D::operator[](size_t index) {
   switch (index) {

@@ -59,7 +59,9 @@ static void Bonxai_IterateAllCells(benchmark::State& state) {
 
   long count = 0;
   for (auto _ : state) {
-    auto visitor = [&](uint32_t&, const CoordT&) { benchmark::DoNotOptimize(count++); };
+    auto visitor = [&](uint32_t&, const CoordT&) {
+      benchmark::DoNotOptimize(count++);
+    };
     grid.forEachCell(visitor);
   }
 }

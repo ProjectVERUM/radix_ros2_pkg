@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
-project(Bonxai)
+project(radix)
+
+# add_compile_definitions(CLASSHISTORY)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
@@ -20,10 +22,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CONFIG_PATH}")
 
 find_package(PCL QUIET COMPONENTS common io)
 
-find_package(benchmark QUIET)
-find_package(octomap QUIET)
+# find_package(benchmark QUIET)
+# find_package(octomap QUIET)
 find_package(LZ4 QUIET)
 find_package(Eigen3 QUIET)
+
+# custom srv/msg
+find_package(radix_msgs REQUIRED)
 
 #---- Use Address sanitizer if compiled in Debug mode ----
 option(BONXAI_SANITIZE "Add address sanitizer when compiling in Debug mode" OFF)
@@ -41,10 +46,10 @@ endif()
 
 ####################################################
 add_subdirectory(bonxai_core)
-add_subdirectory(examples)
+add_subdirectory(radix_utils)
 
 if(Eigen_FOUND AND PCL_FOUND )
-    add_subdirectory(bonxai_map)
+    add_subdirectory(radix_map)
 endif()
 
 # Default behavior
@@ -52,7 +57,7 @@ find_package(ament_cmake QUIET)
 
 if ( ament_cmake_FOUND )
 
-    project(bonxai_ros)
+    project(radix_ros)
 
     # Add colcon-specific configuration here
     message(STATUS "Building with colcon")
@@ -60,31 +65,29 @@ if ( ament_cmake_FOUND )
     find_package(ament_cmake_auto REQUIRED)
     ament_auto_find_build_dependencies()
 
-    include_directories(bonxai_ros/include 3rdparty)
+    include_directories(radix_ros/include 3rdparty)
 
-    ament_auto_add_library(bonxai_server SHARED
-      bonxai_ros/src/bonxai_server.cpp
+    ament_auto_add_library(radix_server SHARED
+        radix_ros/src/server.cpp
     )
 
-    target_link_libraries(bonxai_server
-      bonxai_map
-      ${PCL_LIBRARIES}
+    target_link_libraries(radix_server
+        radix_map
+        radix_utils
+        ${PCL_LIBRARIES}
     )
 
-    rclcpp_components_register_node(bonxai_server
-      PLUGIN "bonxai_server::BonxaiServer"
-      EXECUTABLE bonxai_server_node
-    )
+    rclcpp_components_register_node(radix_server
+    PLUGIN "Server"
+    EXECUTABLE radix_server_node)
 
     ament_auto_package(
       INSTALL_TO_SHARE
-      bonxai_ros/launch
-      bonxai_ros/rviz
-      bonxai_ros/params
+      radix_ros/launch
+      radix_ros/params
     )
-
 else()
 
-  message(STATUS "Building with cmake")
+    message(STATUS "Building with cmake")
 
 endif()

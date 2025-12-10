@@ -1,159 +1,228 @@
-![Bonxai](doc/bonxai.png)
+# Radix
 
-Bonxai is a library that implements a compact hierarchical data structure that
-can store and manipulate volumetric data, discretized on a three-dimensional
-grid (AKA, a "Voxel Grid").
+For more information about the original Bonxai library have a look at [this](README_bonxai.md) Readme.
 
-Bonxai data structure is:
+<!--
+<p align="center">
+  <img src="./docs/assets/radix_square.png" width="60%" style="max-width:1000px; min-width:120px;">
+</p>
 
-- **Sparse**: it uses only a fraction of the memory that a dense 3D voxel grid would use.
-- **Unbounded**: you don't need to define the boundary of the 3D space (*).
+## Examples
 
->(*) The dimension of the 3D space is virtually "infinite":
-since **32-bits indices** are used, given a voxel size of **1 cm**,
-the maximum range of the X, Y and Z coordinates would be about **40.000 Km**.
-As a reference **the diameter of planet Earth is 12.000 Km**.
+The following examples shows a Radix map (top) built from a semantic point cloud (bottom) over time.
 
-If you are familiar with [Octomap](https://octomap.github.io/) and Octrees, you know
-that those data structures are also sparse and unbounded.
+![](./docs/assets/gifs/vis_radix.gif)
 
-On the other hand, Bonxai is **much faster** and, in some cases, even more memory-efficient
-than an Octree.
-
-This work is strongly influenced by [OpenVDB](https://www.openvdb.org/) and it can be considered
-an implementation of the original paper, with a couple of non-trivial changes:
-
-    K. Museth,
-    “VDB: High-Resolution Sparse Volumes with Dynamic Topology”,
-    ACM Transactions on Graphics 32(3), 2013. Presented at SIGGRAPH 2013.
-
-You can read the previous paper [here](http://www.museth.org/Ken/Publications_files/Museth_TOG13.pdf).
-
-There is also some overlap with this other paper, but their implementation is much** simpler,
-even if conceptually similar:
-
-     Eurico Pedrosa, Artur Pereira, Nuno Lau
-     "A Sparse-Dense Approach for Efficient Grid Mapping"
-     2018 IEEE International Conference on Autonomous Robot Systems and Competitions (ICARSC)
+![](./docs/assets/gifs/vis_fused_point_cloud.gif)
+-->
 
 
-**Bonxai** is currently under development and I am building this mostly for fun and for
-educational purposes. Don't expect any API stability for the time being.
 
-# Benchmark (preliminary)
+# Installation
 
-Take these numbers with a grain of salt, since they are preliminary and the benchmark is
-strongly influenced by the way the data is stored.
-Anyway, they gave you a fair idea of what you may expect, in terms of performance.
-
-```
--------------------------------------------
-Benchmark                     Time
--------------------------------------------
-Bonxai_Create              1165 us
-Octomap_Create            25522 us
-
-Bonxai_Update               851 us
-Octomap_Update             3824 us
-
-Bonxai_IterateAllCells      124 us
-Octomap_IterateAllCells     698 us
+## [Option 1] Local Build
+Clone the required repositories:
+```bash
+mkdir -p ros2_ws/src
+cd ros2_ws/src
+git clone https://github.com/ProjectVERUM/radix_ros2_pkg
+git clone https://github.com/ProjectVERUM/radix_msgs_ros2_pkg
 ```
 
-- **Create** refers to creating a new VoxelGrid from scratch
-- **Update** means modifying the value of an already allocated VoxelGrid.
-- **IterateAllCells** will get the value and the coordinates of all the existing cells.
-
-# How to use it
-
-The core of **Bonxai** is a header-only library that you can simply copy into your project
-and include like this:
-
-```c++
-#include "bonxai/bonxai.hpp"
+Then build the packages:
+```bash
+cd ros2_ws
+colcon build --packages-select radix_ros radix_msgs --symlink-install
+source install/setup.bash
 ```
 
-To create a VoxelGrid, where each cell contains an integer value and has size 0.05.
+## [Option 2] Docker
+The image can be built locally. The resulting image will contain a fully configured ROS 2 Humble environment with Radix (`radix_ros2_pkg` and `radix_msgs_ros2_pkg`) and all dependencies pre-installed and ready to use.
 
-```c++
-double voxel_resolution = 0.05;
-Bonxai::VoxelGrid<int> grid( voxel_resolution );
+To build the image manually, ensure you cloned the required repositories as described above and run:
+```bash
+cd ros2_ws/src/radix_ros2_pkg
+docker build -f src/radix_ros2_pkg/Dockerfile -t radix_ros2_pkg:humble --load .
 ```
 
-Nothing prevents you from having more complex cell values, for instance:
-
-```c++
-Bonxai::VoxelGrid<Eigen::Vector4d> vector_grid( voxel_resolution );
-// or
-struct Foo {
- int a;
- double b;
-};
-Bonxai::VoxelGrid<Foo> foo_grid( voxel_resolution );
+Alternatively, pre-built Docker images can be pulled directly from the repository's [package registry](https://github.com/orgs/ProjectVERUM/packages?repo_name=radix_ros2_pkg), e.g.:
+```bash
+# linux/amd64
+docker pull ghcr.io/projectverum/radix_ros2_pkg:humble-2025_12_15
 ```
 
-To insert values into a cell with coordinates x, y and z, use a
-`VoxelGrid::Accessor` object.
-In the next code sample, we will create a dense cube of cells with value 42:
 
-```c++
-// Each cell will contain a `float` and it will have size 0.05
-double voxel_resolution = 0.05;
-Bonxai::VoxelGrid<float> grid( voxel_resolution );
+# Usage
 
-// Create this accessor once, and reuse it as much as possible.
-auto accessor = grid.createAccessor();
+TODO introduction to usage
 
-// Create cells with value 42.0 in a 1x1x1 cube.
-// Given voxel_resolution = 0.05, this will be equivalent
-// to 20x20x20 cells in the grid.
+## [Option 1] Local Build
+TODO
 
-for( double x = 0; x < 1.0; x += voxel_resolution ) {
-  for( double y = 0; y < 1.0; y += voxel_resolution ) {
-    for( double z = 0; z < 1.0; z += voxel_resolution ) {
-      // discretize the position {x,y,z}
-      Bonxai::CoordT coord = grid.posToCoord(x, y, z);
-      accessor.setValue( coord, 42.0 );
-    }
-  }
-}
+## [Option 2] Docker
 
-// You can read (or update) the value of a cell as shown below.
-// If the cell doesn't exist, `value_ptr` will be `nullptr`,
+Simply **run** the container (will run `ros2 launch radix_ros radix_semantic.launch.py`, i.e. using the `semantic` behavior):
 
-Bonxai::CoordT coord = grid.posToCoord(x, y, z);
-float* value_ptr = accessor.value( coord );
+```bash
+docker run radix_ros2_pkg:humble
 ```
 
-## Note about multi-threading
+The launch file to be used can be specified:
+```bash
+docker run radix_ros2_pkg:humble ros2 launch radix_ros radix_semantic.launch.py
+```
 
-`Bonxai::VoxelGrid` is **not** thread-safe, for write operations.
+TODO parameter mounting
 
-If you want to access the grid in **read-only** mode, you can
-use multi-threading, but each thread should have its own
-`accessor`.
+<!--
 
-# Roadmap
+Starting the container will automatically run `ros2 launch radix_ros radix_semantic.launch.py`.
 
-- [x] serialization to/from file.
-- [x] full implementation of the Octomap algorithm (ray casting + probability map).
-- [x] integration with ROS 2.
-- [ ] RViz2 visualization messages.
-- [ ] integration with [FCL](https://github.com/flexible-collision-library/fcl) for collision detection (?)
+To use custom parameters (see [label_params.yaml](radix_ros/params/label_params.yaml), [main_params.yaml](radix_ros/params/main_params.yaml), and [rules.yaml](radix_ros/params/rules.yaml)), modify these files as needed and mount them into the container to overwrite the defaults.
 
-# Frequently Asked Question
+For example, from `ros2_ws/src/radix_ros2_pkg`, after editing the parameter files, start the container with:
 
-**What is the point of reimplementing OpenVDB?**
+```bash
+docker run -t --rm \
+  --name radix_ros2_pkg \
+  -v ./radix_ros/params/:/ros2_ws/src/radix_ros2_pkg/radix_ros/params/ \
+  radix_ros2_pkg:humble
+```
 
-- The number one reason is to have fun and to learn something new :)
-- I want this library to be small and easy to integrate into larger projects.
-  The core data structure is less than 1000 lines of code.
-- It is not an "exact" rewrite, I modified a few important aspects of the algorithm
-    to make it slightly faster, at least for my specific use cases.
 
-**How much memory does it use, compared with Octomap?**
+-->
 
-It is... complicated.
 
-If you need to store very sparse point clouds, you should expect Bonxai to use more memory (20-40% more).
-If the point cloud is relatively dense, Bonxai might use less memory than Octomap (less than half).
+
+<!--
+## Usage
+
+You can set the parameters for Radix in the following files:
+`radix_ros/params/main_params.yaml` , `label_params.yaml` and `rules.yaml`.
+
+### Custom Sensor Data
+
+If you want to use your own sensor data, set the `cloud_in_topic` parameter to the topic where your sensor publishes point clouds (with cleaning ray)
+
+
+### Run Radix
+
+Before running Radix, you need to source the ROS 2 environment so ros2 knows that it exists. These files normally are in the `install` folder of the workspace.
+
+```bash
+source install/setup.bash
+```
+
+Then launch the server node with the desired behavior with the following command:
+
+```bash
+ros2 launch radix_ros radix_basic.launch.py
+ros2 launch radix_ros radix_gaussian.launch.py
+ros2 launch radix_ros radix_semantic.launch.py
+ros2 launch radix_ros radix_icp.launch.py
+```
+
+### Run Rviz
+
+```bash
+rivz2
+
+# with settings for real data
+rviz2 -d src/radixrviz/realdata.rviz
+
+# with settings for simulation
+rviz2 -d src/radix/rviz/simdata.rviz
+```
+
+Radix expects a pointcloud with label_id's (with colors defined in class_config) in the label field of the pc2.
+
+Sometimes it is necessary to change some settings in Rviz to visualize the map correctly (but with rviz config above it should be fine).
+
+Add the topic `/radix_point_cloud_centers`, use flat squares or boxes and increase the size to 0.5. This should make the map clearly visible.
+
+### Run a rosbag
+
+```bash
+# Run outside of the folder where the ros_bag_name.db3 and metadata.yaml file is located
+ros2 bag play <folder_name>
+```
+
+![Radix](./docs/assets/imgs/map.png)
+
+## Behaviors
+
+Radix supports different behaviors that can be configured to modify how the map is built or interpreted (e.g., Voxeltype, incoming pointcloud type, insertion behavior).
+
+For details on available behaviors and how to use them, see the [Behaviors](./docs/behaviors.md).
+
+## Services
+
+### [Saving and Loading Maps](./docs/loading.md)
+
+### [Publishing Chunks](./docs/chunking.md)
+
+### [Bird’s Eye View](./docs/birdsEyeView.md)
+
+### [Rendering Options](./docs/rendering.md)
+
+### [Validating Map](./docs/validate.md)
+
+### [Debugging](./docs/debugging.md)
+
+### [Publishing](./docs/publishing.md)
+
+### [Rules](./docs/rules.md)
+
+### (X) Different Resolutions
+
+For the **chunk**, **render** and **birds_eye_view** services, you can specify the level it should be ran at.
+The default level is "cell", the other levels are "cell" < "leaf" < "inner".
+**WARNING** Some services are not working correctly yet with "leaf" and "inner" levels.
+
+For publishing chunks, the size of the points in rviz will need to be adjusted depending on level/resolution to make it look nice.
+
+# Setting Parameters at Runtime
+
+You can modify certain Radix parameters at runtime using the following command:
+
+```bash
+ros2 param set /radix_server <parameter_name> <new_value>
+```
+
+Replace <parameter_name>, and <new_value> with your specific values.
+
+**Note**: Some parameters may not make sense to change at runtime.
+-->
+
+
+
+
+# Development
+
+This repository uses [`pre-commit`](https://pre-commit.com/) to run automated
+
+### Setup
+
+Install `pre-commit`:
+
+```bash
+pip install pre-commit
+```
+
+Install the Git hooks for this repository:
+```bash
+pre-commit install
+```
+
+Once installed, the checks will run automatically on every git commit. Checks can also be run with `pre-commit run -a`.
+
+
+# Docs
+
+More detailed explanations about how the application is structured can be found in `./docs`.
+
+You can may serve those with mkdocs (`pip install mkdocs==1.6.0 mkdocs-material==9.5.21 jinja2==3.1.4`):
+
+```bash
+mkdocs serve  # serves on http://127.0.0.1:8000/
+```

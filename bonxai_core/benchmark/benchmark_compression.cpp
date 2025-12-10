@@ -21,8 +21,8 @@ static void Bonxai_Compress(benchmark::State& state) {
 
     for (const auto& point : *cloud) {
       auto coord = grid.posToCoord(point.x, point.y, point.z);
-      uint16_t col =
-          uint16_t(point.r >> 3) | (uint16_t(point.g >> 2) << 5) | (uint16_t(point.b >> 3) << 11);
+      uint16_t col = uint16_t(point.r >> 3) | (uint16_t(point.g >> 2) << 5) |
+                     (uint16_t(point.b >> 3) << 11);
       accessor.setValue(coord, col);
     }
 
@@ -33,7 +33,8 @@ static void Bonxai_Compress(benchmark::State& state) {
     const int src_size(serialized.size() + 1);
     const size_t max_dst_size = LZ4_compressBound(src_size);
     compressed_data.resize(max_dst_size);
-    LZ4_compress_default(serialized.data(), compressed_data.data(), src_size, max_dst_size);
+    LZ4_compress_default(serialized.data(), compressed_data.data(), src_size,
+                         max_dst_size);
   }
 }
 
@@ -43,7 +44,8 @@ static void PCL_Compress(benchmark::State& state) {
   for (auto _ : state) {
     std::stringstream compressedData;
     pcl::io::OctreePointCloudCompression<pcl::PointXYZRGB> encoder(
-        pcl::io::MANUAL_CONFIGURATION, false, COMPRESSION_RES, COMPRESSION_RES, true, 20, true, 6);
+        pcl::io::MANUAL_CONFIGURATION, false, COMPRESSION_RES, COMPRESSION_RES,
+        true, 20, true, 6);
 
     encoder.encodePointCloud(cloud, compressedData);
   }

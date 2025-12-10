@@ -1,0 +1,177 @@
+# define shared parameters
+params:
+  # hit
+  prob_hit: &prob_hit 0.55
+  # miss
+  prob_miss_default: &prob_miss_default 0.49
+  prob_miss_moving: &prob_miss_moving 0.475
+  prob_miss_stationary: &prob_miss_stationary 0.498
+
+labels:
+  # unlabeled (default)
+  0:
+    name: unlabeled
+    color:
+      r: 0
+      g: 0
+      b: 0
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_default
+  # vehicle (may move)
+  1:
+    name: car
+    color:
+      r: 100
+      g: 150
+      b: 245
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  2:
+    name: bicycle
+    color:
+      r: 100
+      g: 230
+      b: 245
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  3:
+    name: motorcycle
+    color:
+      r: 30
+      g: 60
+      b: 150
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  4:
+    name: truck
+    color:
+      r: 80
+      g: 30
+      b: 180
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  5:
+    name: other-vehicle
+    color:
+      r: 0
+      g: 0
+      b: 255
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  # human (may move)
+  6:
+    name: person
+    color:
+      r: 255
+      g: 30
+      b: 30
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  7:
+    name: bicyclist
+    color:
+      r: 255
+      g: 40
+      b: 200
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  8:
+    name: motorcyclist
+    color:
+      r: 150
+      g: 30
+      b: 90
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_moving
+  # ground (stationary)
+  9:
+    name: road
+    color:
+      r: 255
+      g: 0
+      b: 255
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  10:
+    name: parking
+    color:
+      r: 255
+      g: 150
+      b: 255
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  11:
+    name: sidewalk
+    color:
+      r: 75
+      g: 0
+      b: 75
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  12:
+    name: other-ground
+    color:
+      r: 175
+      g: 0
+      b: 75
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  # structure (stationary)
+  13:
+    name: building
+    color:
+      r: 255
+      g: 200
+      b: 0
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  # nature (stationary)
+  15:
+    name: vegetation
+    color:
+      r: 0
+      g: 175
+      b: 0
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  16:
+    name: trunk
+    color:
+      r: 135
+      g: 60
+      b: 0
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  17:
+    name: terrain
+    color:
+      r: 150
+      g: 240
+      b: 80
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  # object  (stationary)
+  14:
+    name: fence
+    color:
+      r: 255
+      g: 120
+      b: 50
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  18:
+    name: pole
+    color:
+      r: 255
+      g: 240
+      b: 150
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
+  19:
+    name: traffic-sign
+    color:
+      r: 255
+      g: 0
+      b: 0
+    prob_hit: *prob_hit
+    prob_miss: *prob_miss_stationary
