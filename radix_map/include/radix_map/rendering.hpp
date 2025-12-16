@@ -69,8 +69,7 @@ inline PixelValue getPixelValue(
         pixel_value.label_id = accessor.getMetaData(coord, level)->max_class;
       }
 
-      //TODO: semantic prob
-      pixel_value.semantic_prob = 0.5;
+      pixel_value.semantic_prob = cell->semantic_prob;
       pixel_value.hit_coord = coord;
       pixel_value.depth_prob = prob(cell->probability_log);
       return false;

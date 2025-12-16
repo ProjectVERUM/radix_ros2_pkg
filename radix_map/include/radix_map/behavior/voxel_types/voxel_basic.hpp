@@ -12,6 +12,7 @@ class VoxelBasic : public VoxelBase {
 
   int instanceID;
   int32_t label;
+  float semantic_prob = 0.5f;  // unsupported: will remain unchanged
 
   Queue<int, 5> label_history;
   Queue<float, 5> uncertainty_history;

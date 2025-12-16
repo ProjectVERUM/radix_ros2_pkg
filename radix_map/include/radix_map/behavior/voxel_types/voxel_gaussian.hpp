@@ -28,9 +28,11 @@ class VoxelGaussian : public VoxelBase {
   inline static uint32_t num_labels;
   std::vector<float> label_probs;  // probability for each class label
   int32_t label;                   // label with currently highest probability
+  float semantic_prob = 0.5f;      // semantic probability of label
 
   // Proper initialization for C++17 ----
-  VoxelGaussian() : update_id(0), probability_log(0), label(0) {
+  VoxelGaussian()
+      : update_id(0), probability_log(0), label(0), semantic_prob(0.5f) {
     // Initialize label_probs uniformly
     if (num_labels > 0) {
       label_probs.resize(num_labels, 1.0f / static_cast<float>(num_labels));
@@ -95,9 +97,10 @@ class VoxelGaussian : public VoxelBase {
       }
     }
 
-    // // when unlabeled (= 0) classifications are incoming to a voxel that already has a label, then keep the existing label
+    // when unlabeled (= 0) classifications are incoming to a voxel that already has a label, then keep the existing label
     if (best != 0)
       label = best;
+    semantic_prob = best_prob;
   }
 };
 
