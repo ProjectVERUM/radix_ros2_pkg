@@ -1,9 +1,13 @@
 # Radix
 
-[![ROS 2 Humble](https://img.shields.io/badge/ROS2-Humble-blue?logo=ros)](https://docs.ros.org/en/humble/)
-[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue?logo=cplusplus)](https://en.cppreference.com/w/cpp/17)
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen)](LICENSE)
-[![GHCR](https://img.shields.io/badge/Docker-GHCR-blue?logo=docker)](https://github.com/orgs/ProjectVERUM/packages?repo_name=radix_ros2_pkg)
+<p align="center">
+  <a href="https://docs.ros.org/en/humble/"><img src="https://img.shields.io/badge/ROS2-Humble-blue?logo=ros" alt="ROS 2 Humble"></a>
+  <a href="https://en.cppreference.com/w/cpp/17"><img src="https://img.shields.io/badge/C%2B%2B-17-blue?logo=cplusplus" alt="C++17"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MPL_2.0-brightgreen" alt="License: MPL 2.0"></a>
+  <a href="https://github.com/orgs/ProjectVERUM/packages?repo_name=radix_ros2_pkg"><img src="https://img.shields.io/badge/Docker-GHCR-blue?logo=docker" alt="GHCR"></a>
+</p>
+
+<p align="center"><img src="./docs/assets/radix_square.png" width="40%"></p>
 
 Radix is a C++ library for **semantic occupancy grid mapping**, integrated as a ROS 2 node. It continuously fuses incoming point clouds from rosbag replay or manual insertion into a sparse 3D voxel grid and exposes the live map to downstream applications via ROS 2 services.
 
