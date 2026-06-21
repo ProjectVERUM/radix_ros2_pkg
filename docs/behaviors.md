@@ -1,25 +1,29 @@
 # Behaviors
 
-Behaviors are the main way to configure the behavior of the map in more detail.
-This is done by using a strategy pattern with templates.
+Behaviors are the main way to configure the map in more detail. They use a strategy pattern with templates, so switching behaviors requires only changing the `behavior` parameter in `radix_ros/params/<behavior>/main_params.yaml`.
 
-You can find the current different behaviors in the `radix_map/include/radix_map/behavior` folder.
-You can switch between them by changing the `behavior` parameter in the `radix_ros/params/main_params.yaml`.
+The available behavior names are defined in `radix_map/include/radix_map/map_factory.hpp`, which maps each name string to its implementation class. The behavior implementations live in `radix_map/include/radix_map/behavior/`.
 
-The name of the behavior is defined in the `radix_map/include/radix_map/map_factory.hpp` file, which maps the name to the class.
-
-Currently the following behaviors are available:
+Adding a new behavior requires defining three things: the voxel data struct, the corresponding point type, and the insertion logic. The existing behaviors serve as ready-to-use templates for this.
 
 ## Basic
 
-The Basic behavior is the simplest behavior. It takes new label points and stores them in a limited history queue within each voxel, specifically keeping only the last five seen labels. The voxel maintains a label parameter which is always synchronized to reflect the most recently seen label from the history queue.
+The simplest behavior. Stores only an occupancy probability per voxel. Input point clouds require XYZ fields only.
 
 ## Semantic
 
-The Semantic behavior builds on the basic behavior by maintaining a histogram of label probabilities for each voxel, storing the likelihood of all observed labels over time. As new points are added, the voxel updates these probabilities using an exponential moving average, effectively capturing the weighted distribution of labels within the voxel. For publishing, it selects the label with the highest probability along with its associated confidence.
+Maintains a per-voxel histogram of label probabilities over all observed labels. As new points arrive, the histogram is updated via an exponential moving average, capturing the weighted label distribution within the voxel. For publishing, the label with the highest probability and its associated confidence are selected.
 
+Input point clouds require an additional semantic `label` field.
 
 ## Gaussian
 
-The Gaussian behavior extends the Semantic behavior by enhancing the geometric representation of the voxel's content. It maintains the existing histogram of label probabilities while simultaneously tracking Gaussian statistics for the points contained within the voxel.This involves modeling the 3D spatial distribution of the observed points by incrementally calculating and storing the mean and the covariance matrix.
-For publishing, the behavior outputs a combined semantic and geometric representation: the label with the maximum probability along with its associated confidence, and the calculated Gaussian statistics.
+Extends Semantic by adding per-voxel geometric statistics. In addition to the label probability histogram, it incrementally computes and stores the mean (μ) and covariance matrix (Σ) of all points observed within the voxel, modeling the local 3D spatial distribution. For publishing, the behavior outputs the maximum-probability label with its confidence alongside the Gaussian statistics.
+
+Input point clouds require an additional semantic `label` field.
+
+## ICP
+
+Combines the Gaussian geometry statistics with semantic labels, specifically to support ICP-based scan registration and odometry. Used in the SOCC-ICP pipeline.
+
+Input point clouds require an additional semantic `label` field.

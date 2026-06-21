@@ -4,37 +4,24 @@ title: Overview
 
 # Overview
 
-This describes the structure built upon the Bonxai library (bonxai.hpp and related header files).
-
-![Overview](./assets/gifs/vis_radix.gif)
-
+This describes the internal structure of Radix, which is built on top of the Bonxai library (`bonxai.hpp` and related header files).
 
 # Main Classes
 
 ## Map
 
-The map class contains the VoxelGrid and holds methods like ray casting and adding points to the map.
-It then uses the VoxelGrid API in these methods to access the actual map.
+The `Map` class holds the `VoxelGrid` and provides methods for ray-casting and inserting points into the map. It uses the VoxelGrid API internally to access and modify the grid.
 
-It holds most things defined in the behavior classes.
+Most of the map's behavior-specific logic is delegated to the behavior classes.
 
 ## Server
 
-The server class mainly handles the connection to the ROS2 ecosystem.
-This includes reading the launch files, and various other configs.
-It also handles all the ROS2 topics (publishers and subscribers) and services.
+The `Server` class handles all ROS 2 integration: reading launch parameters, managing topics (publishers and subscribers), and exposing services.
 
-The methods on this class should always just handle the communication with ROS2.
-For everything else, it should call the map methods that interface with the map.
-
-For receiving point clouds, it is necessary to use the map methods to decode as well, because the behavior point types can't be used from the server class, because it is not templated.
-
+Methods on this class should only handle ROS 2 communication. All map logic is delegated to `Map` methods. Point cloud decoding also goes through the map methods, because the behavior-specific point types are not accessible from the non-templated server class.
 
 ## Behavior
 
-The behavior class that needs to be implemented for each custom behavior.
-It modifies different parts of the application, mainly in the map class.
-You can create a custom Voxel type and a Point type that a pointcloud might have.
-Then you can define how that Voxel (or the fields on it) change when a point of that type gets inserted.
+The `Behavior` class defines the interface that each custom behavior must implement. It controls voxel data layout and insertion logic in the `Map` class. Custom behaviors define a `Voxel` type, a `Point` type matching the incoming point cloud format, and how voxel fields are updated when a point is inserted.
 
-More info found in [Behaviors](./behaviors.md)
+See [Behaviors](./behaviors.md) for details.

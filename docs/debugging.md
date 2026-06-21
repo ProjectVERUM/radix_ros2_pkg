@@ -1,53 +1,32 @@
 # Debugging
 
+For GDB-based debugging, add the gdbserver prefix to the launch file:
 
-For real debugging i didn't fine a better way than the following:
-
-Add the prefix to the launch file (see launch file):
 ```
 gdbserver localhost:3000 --
 ```
 
-And add RelWithDebInfo to the colcon/cmake build (EXPORT COMPILE COMMANDS is for editor lsp support):
+Build with debug symbols and compile commands (for editor LSP support):
 
+```bash
+colcon build --packages-select radix_ros radix_msgs \
+  --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
 ```
-colcon build --packages-select radix_ros radix_msgs --cmake-args-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
-```
 
-Then run the launch file with the prefix.
-This enables remote debugging with gdb.
-You will notice that the program will stop right away.
+Then run the launch file with the prefix. The program will stop immediately after launch and wait for a debugger to attach.
 
-To debug after launching:
+Connect with GDB:
 
-```
+```bash
 gdb
-```
-
-then to connect to the remote gdbserver (the program):
-
-```
 target remote localhost:3000
-```
-
-then to run the program:
-
-
-```
 continue
 ```
 
-this will run the program until it hits a breakpoint/exception.
+`continue` runs the program until it hits a breakpoint or exception. Trigger the scenario you want to investigate (e.g. call a service), then:
 
-
-You can now call a service for example, or otherwise produce the crash that lead you to debugging.
-Then
-
-```
+```bash
 bt
 ```
 
-to get the backtrace (where the actual crash happened).
-
-
-Put it in chatgpt or read actually read it :).
+to get a backtrace showing where the crash or assertion occurred.

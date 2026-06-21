@@ -2,25 +2,19 @@
 
 ## Loading
 
-Basic loading:
+Loading a map deserializes it in the following steps:
 
-- deserialize header of map
-- find the type of behavior of the map
-- set the current config to the correct behavior
-- create a new map with the correct behavior (createMapFromConfig)
-- deserialize the grid
-- set the maps grid to the deserialized grid
+1. Read the map header
+2. Determine the behavior type stored in the map
+3. Set the server configuration to the matching behavior
+4. Create a new map with that behavior (`createMapFromConfig`)
+5. Deserialize the voxel grid
+6. Replace the current map grid with the deserialized one
 
+Two ways to trigger loading:
 
-These are the ways to load a map:
-- set map name in `params/label_params.yaml`
-    - set `load_map` to the name of the map
-    - Basic loading
-- call load service with map name
-    - set `load_map` to the name of the map in the service request
-    - destruct the current map
-    - Basic loading
-
+- **At startup** — set `load_map` to the map name in `radix_ros/params/<behavior>/main_params.yaml`
+- **At runtime** — call the load service:
 
 ```bash
 ros2 service call /radix_server/load 'radix_msgs/srv/Load' "{filename: <string>}"
@@ -28,18 +22,12 @@ ros2 service call /radix_server/load 'radix_msgs/srv/Load' "{filename: <string>}
 
 ## Saving
 
-Saving only works by calling the save service with a map name.
 ```bash
 ros2 service call /radix_server/save 'radix_msgs/srv/Save' "{filename: <string>}"
 ```
 
-filename is only the name of the map (in the map dir), not the full path, and without extension
+`filename` is the map name only (relative to `map_dir`), without a file extension. Radix appends `.radix` automatically.
 
+## Known Limitations
 
-Currently Bonxai has a 10s timer that resets when a pointcloud is inserted. If the timer runs out, it will try to save to the specified directory with the specified name.
-
-# Issues/Weirdness
-
-- Need custom serialization for heap allocated objects (e.g. unordered_map) in voxels
-    - so need to loop over map and write/read keys and values instead
-    - would be nice to find an alternative
+- Voxels containing heap-allocated objects (e.g. `unordered_map`) require custom serialization: keys and values must be written/read explicitly rather than using a flat memory copy.

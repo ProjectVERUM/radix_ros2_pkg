@@ -1,39 +1,31 @@
 # Rendering
 
-Bonxai provides a rendering service to generate images of the map from a specified viewpoint.
+Radix provides a rendering service that generates images of the map from a specified viewpoint. Results are published on `/radix_image`.
 
 ## Taking an image of the map
 
-Rendering of an image from a certain perspective. The image will be published on the topic `/radix_image`.
-
 Two options are available:
 
-#### Latest tf data
+### Using the latest TF pose
 
-Run this service to take an image of the map with the latest tf data as the camera pose(need to source the package before calling with `source install/setup.zsh`):
+Renders from the current sensor pose as reported by TF (source the workspace first: `source install/setup.bash`):
 
 ```bash
 ros2 service call /radix_server/render 'radix_msgs/srv/Render' "{live: true}"
 ```
 
-#### Custom Pose
-
-Run this service to take an image of the map with a custom pose:
+### Custom pose
 
 ```bash
-ros2 service call /radix_server/render radix_msgs/srv/Render "{x: <x-coordinate>, y: <y-coordinate>, z: <z-coordinate>, roll: <roll>, pitch: <pitch>, yaw: <yaw>, max_range: <max_range>, width: <width>, height: <height>, yaw_angle: <yaw_angle>, pitch_angle: <pitch_angle>, level: <'cell'|'leaf'|'inner'>, live: <true|false>, publish: <true|false>, occupancy_threshold: <threshold>, use_rgb: <true|false>}"
+ros2 service call /radix_server/render radix_msgs/srv/Render "{x: <x>, y: <y>, z: <z>, roll: <roll>, pitch: <pitch>, yaw: <yaw>, max_range: <max_range>, width: <width>, height: <height>, yaw_angle: <yaw_angle>, pitch_angle: <pitch_angle>, level: <'cell'|'leaf'|'inner'>, live: <true|false>, publish: <true|false>, occupancy_threshold: <threshold>, use_rgb: <true|false>}"
 ```
 
-If `publish` is set to true, the images will also be published as ROS topics. The `occupancy_threshold` parameter defines the threshold for considering a voxel occupied, and if `use_rgb` is set to true, the rendering will include RGB color information in the output image.
-
+Setting `publish: true` also publishes the images as ROS topics. `occupancy_threshold` sets the minimum probability to count a voxel as occupied. `use_rgb` includes RGB color in the output images. All fields have defaults defined in `srv/Render.srv`.
 
 The service returns:
-a `sensor_msgs/Image` for the Semantic Image.
-a sensor_msgs/Image for the Semantic Probability Image.
-a sensor_msgs/Image for the Depth Image.
-a sensor_msgs/Image for the Depth Probability Image.
-a bool `success` that is true if the operation succeeded; if it is false, check the `reason` field for an error message.
 
-All the values have reasonable defaults, so you can leave them empty if you want to use the defaults, which are defined in `srv/Render.srv`
-
-![rendering](./assets/imgs/rendering.png)
+- `semantic_img` — semantic label image (`sensor_msgs/Image`)
+- `semantic_prob_img` — label confidence image (`sensor_msgs/Image`)
+- `depth_img` — depth image (`sensor_msgs/Image`)
+- `depth_prob_img` — depth probability image (`sensor_msgs/Image`)
+- `success` — `true` if the operation succeeded; if `false`, check `reason` for an error message

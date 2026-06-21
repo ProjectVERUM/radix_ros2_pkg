@@ -1,66 +1,25 @@
 # Rules
 
-You can apply filters (denoising kernels) to a specified chunk to remove noise and correct the map.
-
-To apply filters, run:
+Rules apply denoising filters to a specified region of the map to remove noise and correct voxel labels.
 
 ```bash
-ros2 service call /radix_server/rules 'radix_msgs/srv/Rules' "{x_min: -200, y_min: -200, z_min: -200, x_max: 200, y_max: -200, z_max: 200}"
+ros2 service call /radix_server/rules 'radix_msgs/srv/Rules' "{x_min: -200, y_min: -200, z_min: -200, x_max: 200, y_max: 200, z_max: 200}"
 ```
 
-This command first gathers all voxels that need to be updated and then updates the map in a single step.
+This first collects all voxels within the bounding box that need to be updated, then applies the updates in a single pass.
 
 ## Majority Label / Label Dilation Rule
 
-The main rule implemented is label dilation, which updates voxel labels based on the majority of neighboring labels. The process is configurable per class and uses a neighborhood kernel.
+The main implemented rule is label dilation: each voxel's label is updated based on the majority label among its neighbors. The process is configurable per class.
 
-- Class-based configuration:
+- **Class-based configuration** — each label can define an optional `dilation_update_thres` in `label_params.yaml`:
+  - *Not defined*: uses the default `update_thres` from `rules.yaml`
+  - *Set to `-1`*: label is excluded from updates (e.g. persons)
 
-    Each label can have an optional parameter dilation_update_thres:
+- **Kernel-based processing** — one or more kernels can be applied sequentially (`kernel_size: [5, 5, 5]` in `rules.yaml`). The dilation operation runs after each kernel in order.
 
-    - **Not defined**: The label uses the default update_thres from the rules configuration.
-    - **Set to -1**: The label is ignored during the update (e.g., persons are not updated).
+- **Update logic** — for each voxel in the region: collect neighbor labels within the kernel, determine the majority label, and update the voxel only if the majority count exceeds the threshold for that class.
 
-- Kernel-based processing:
+This allows fine-grained control over which labels are updated and how strongly neighboring voxels influence the result.
 
-    One or more kernels can be applied sequentially, as specified in the configuration (kernel_size: [5, 5, 5]).
-    The dilation operation is applied after each kernel in order.
-
-- Updating voxels:
-
-    For each voxel in the selected region:
-
-    - Collects labels from the neighborhood defined by the current kernel.
-
-    - Determines the majority label among these neighbors.
-
-    - Updates the voxel only if the majority label count exceeds the threshold for that class (or default
-      threshold if not specified)
-
-This approach allows control over which labels are updated and how strongly neighboring voxels influence the update.
-
-## Example
-
-Below is an example of a map chunk before and after applying the rules.
-
-
-before aplying rules :
-
-![before](./assets/imgs/before.png)
-
-
-
-after applying rules :
-
-![corrected](./assets/imgs/corrected.png)
-
----
-
-
-To test class-specific thresholds, add a `dilation_update_thres` value for an existing class in `label_params.yaml`. This will override the default threshold for that class during label dilation.
-
-
-After applying the rules while excluding the building class:
-
-
-![corrected_skip_building](./assets/imgs/corrected_skip_building.png)
+To test class-specific thresholds, add a `dilation_update_thres` value for a class in `label_params.yaml`. This overrides the default threshold for that class during label dilation.
